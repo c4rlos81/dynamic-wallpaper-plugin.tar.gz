@@ -1,0 +1,60 @@
+tasks:
+  - name: Setup Android SDK and Build APK
+    init: |
+      # Install required packages
+      sudo apt-get update
+      sudo apt-get install -y wget unzip openjdk-17-jdk
+      
+      # Download and setup Android SDK
+      echo "📦 Downloading Android SDK..."
+      cd $HOME
+      wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+      unzip -q commandlinetools-linux-9477386_latest.zip
+      mkdir -p android-sdk/cmdline-tools/latest
+      mv cmdline-tools/* android-sdk/cmdline-tools/latest/
+      rm commandlinetools-linux-9477386_latest.zip
+      
+      # Set environment variables
+      export ANDROID_HOME=$HOME/android-sdk
+      export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools
+      
+      # Accept licenses
+      echo "✅ Accepting Android SDK licenses..."
+      yes | sdkmanager --licenses > /dev/null 2>&1
+      
+      # Install required SDK components
+      echo "📥 Installing Android SDK components..."
+      sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.0" > /dev/null 2>&1
+      
+      # Navigate to project and build
+      echo "🔨 Building APK..."
+      cd /workspace/dynamic-wallpaper-plugin
+      chmod +x gradlew
+      ./gradlew assembleDebug
+      
+      echo ""
+      echo "🎉 BUILD COMPLETE!"
+      echo "📱 Your APK is ready at:"
+      echo "   app/build/outputs/apk/debug/app-debug.apk"
+      echo ""
+      echo "📥 To download:"
+      echo "   1. Look in the left sidebar Files panel"
+      echo "   2. Navigate to app/build/outputs/apk/debug/"
+      echo "   3. Right-click app-debug.apk"
+      echo "   4. Click 'Download'"
+      echo ""
+    
+    command: |
+      export ANDROID_HOME=$HOME/android-sdk
+      export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools
+      echo "✨ Workspace ready! APK should be built."
+      echo "If build failed, run: ./gradlew assembleDebug"
+
+vscode:
+  extensions:
+    - vscjava.vscode-java-pack
+    - mathiasfrohlich.Kotlin
+
+ports:
+  - port: 8080
+    visibility: private
